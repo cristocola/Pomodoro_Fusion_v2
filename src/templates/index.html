@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Pomodoro Fusion</title>
+  <link rel="icon" type="image/x-icon" href="favicon.ico">
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../static/css/style.css">
+</head>
+
+<body>
+  <main class="container">
+
+    <div class="main-content-area">
+
+      <header>
+        <div class="header-main">
+          <img id="logo" src="../static/img/pomodorsi.webp" alt="Pomodoro Fusion Logo" onerror="this.src='https://placehold.co/100x100/ff8c00/FFFFFF?text=P'">
+          <h1>Pomodoro Fusion</h1>
+        </div>
+      </header>
+
+      <section id="quote-box" aria-live="polite">
+        "The secret of getting ahead is getting started." – Mark Twain
+      </section>
+
+      <section id="workday-management" class="workday-controls">
+        <div id="workdayStatusIndicator" class="workday-status-indicator" aria-live="polite">Workday: Stopped</div>
+        <button id="startWorkdayBtn" aria-label="Start your workday and enable time debt tracking">Start Workday</button>
+        <button id="endWorkdayBtn" class="hidden" aria-label="End your workday and stop time debt tracking">End Workday</button>
+        <div id="timeDebtDisplay" class="hidden" aria-live="polite">Time Debt: <span id="timeDebtValue">00:00</span></div>
+      </section>
+
+      <section id="timer-section" aria-labelledby="timer-heading">
+        <h2 id="timer-heading" class="visually-hidden">Timer Status</h2>
+        <div id="timer-status" aria-live="polite">Ready</div>
+        <div id="timer" aria-live="polite">25:00</div>
+      </section>
+
+      <div id="controls">
+        <button id="startWorkBtn" aria-label="Start or Pause Work Timer">Start Work</button>
+        <button id="startBreakBtn" class="hidden" aria-label="Start Break Timer">Start Break</button> <button id="skipBreakBtn" class="hidden" aria-label="Skip current break">Skip Break</button>
+        <button id="finishEarlyBtn" class="hidden" aria-label="Finish current session early and log">Finish Early</button>
+        <button id="resetBtn" aria-label="Reset Timer and current session cycle">Reset Cycle</button>
+      </div>
+
+      <section id="todays-progress-display" aria-labelledby="progress-heading">
+        <h2 id="progress-heading">Today's Progress</h2>
+        <div id="pomo-count">Today's sessions: 0</div>
+        <div id="pomodoro-visual" aria-label="Visual indicator of completed sessions today"></div>
+      </section>
+
+      <section id="log-display-section" aria-labelledby="log-heading">
+        <h2 id="log-heading">Completed Pomodoros Log</h2>
+        <div class="log-options">
+          <label for="showTodayOnly">
+            <input type="checkbox" id="showTodayOnly" checked> Show Only Today's Logs
+          </label>
+          <a id="viewHistoryLink" class="button-link" href="/dashboard" target="_blank" rel="noopener noreferrer">View Full History</a>
+        </div>
+        <div class="log-container">
+          <ul id="log" aria-live="polite">
+            <li class="empty-log">Loading logs...</li>
+          </ul>
+        </div>
+        <div class="log-controls">
+          <button id="settingsBtn" aria-label="Open Timer Settings">Settings</button>
+          <button id="deleteLogBtn" aria-label="Delete the last logged Pomodoro session">Delete Last Log</button>
+        </div>
+      </section>
+
+      <div id="reward-quote" class="hidden" aria-live="polite"></div> <div id="api-status" aria-live="assertive"></div>
+
+    </div> </main> <div id="settings-modal-container" aria-modal="true" role="dialog" aria-labelledby="settings-heading-modal">
+    <form id="settings-form">
+      <button type="button" id="closeSettingsBtn" aria-label="Close Settings">×</button>
+      <fieldset>
+        <legend id="settings-heading-modal">Timer Settings</legend>
+        <div class="settings-grid">
+          <label for="pomodoroLength">Work (mins):
+            <input type="number" id="pomodoroLength" value="25" min="1" max="90">
+          </label>
+          <label for="breakLength">Short Break (mins):
+            <input type="number" id="breakLength" value="5" min="1" max="30">
+          </label>
+          <label for="longBreakLength">Long Break (mins):
+            <input type="number" id="longBreakLength" value="25" min="5" max="60">
+          </label>
+          <label for="longBreakInterval">Long Break After:
+            <input type="number" id="longBreakInterval" value="4" min="1" max="10">
+          </label>
+        </div>
+      </fieldset>
+      <fieldset>
+        <legend>Alarm & Notifications</legend>
+        <div class="settings-grid">
+          <label for="alarmLength">Alarm Duration (s):
+            <input type="number" id="alarmLength" value="7" min="1" max="30">
+          </label>
+          <div class="volume-control">
+            <label for="alarmVolume">Volume:</label>
+            <input type="range" id="alarmVolume" name="volume" min="0" max="10" value="4"> <span id="volumeValue">4</span> </div>
+        </div>
+        <div id="notification-control">
+          <button type="button" id="enableNotificationsBtn">Enable Notifications</button>
+        </div>
+      </fieldset>
+    </form>
+  </div>
+  <audio id="alarm-sound" src="../static/audio/alarm.mp3" preload="auto"></audio>
+  <script src="../static/js/main.js"></script>
+  
+</body>
+</html>

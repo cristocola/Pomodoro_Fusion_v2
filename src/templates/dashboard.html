@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pomodoro Power Dashboard - Advanced</title>
+    <link rel="icon" type="image/x-icon" href="../static/img/favicon.ico">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" href="../static/css/dashboard.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div class="header-title">
+                <img id="logo" src="../static/img/pomodorsi.webp" alt="Pomodoro Logo" onerror="this.src='https://placehold.co/45x45/f39c12/FFFFFF?text=P'">
+                <div>
+                    <h1>Pomodoro Power Dashboard</h1>
+                    <p class="subtitle">Your Journey to Peak Productivity</p>
+                </div>
+            </div>
+            <div class="header-controls">
+                <button id="refresh-button"><i class="fas fa-sync-alt"></i>Refresh Data</button>
+            </div>
+        </header>
+
+        <main class="dashboard-grid">
+            <section class="dashboard-card quick-stats-card">
+                <h2 class="card-title"><i class="fas fa-tachometer-alt"></i>Quick Stats</h2>
+                <div class="quick-stats-grid">
+                    <div class="stat-item"><h3>Total Pomodoros</h3><span class="value" id="total-pomodoros">--</span></div>
+                    <div class="stat-item"><h3>Total Days Logged</h3><span class="value" id="total-days">--</span></div>
+                    <div class="stat-item"><h3>Avg / Logged Day</h3><span class="value" id="average-per-day">--</span></div>
+                    <div class="stat-item" id="longest-streak-item">
+                        <h3>Longest Streak</h3>
+                        <span class="value" id="longest-streak">--</span><span class="label">Consecutive Days</span>
+                        <span class="sub-label" id="longest-streak-details">Avg: -- Pomos | Peak: --</span>
+                        <span class="tooltip" id="longest-streak-tooltip">From: -- To: --</span>
+                    </div>
+                    <div class="stat-item"><h3>Best Day</h3><span class="value" id="best-day-count">--</span><span class="label" id="best-day-date">--</span></div>
+                     <div class="stat-item" id="current-streak-item">
+                        <h3>Current Streak</h3>
+                        <span class="value" id="current-streak">--</span><span class="label">Days</span>
+                        <span class="sub-label" id="current-streak-details">Avg: -- Pomos | Peak: --</span>
+                        <span class="tooltip" id="current-streak-tooltip">Started: --</span>
+                    </div>
+                    <div class="stat-item"><h3>Days > 4 Pomos</h3><span class="value" id="days-over-4">--</span><span class="label">Good Focus</span></div>
+                    <div class="stat-item"><h3>Days > 8 Pomos</h3><span class="value" id="days-over-8">--</span><span class="label">High Focus</span></div>
+                    <div class="stat-item"><h3>Days > 12 Pomos</h3><span class="value" id="days-over-12">--</span><span class="label">Peak Focus</span></div>
+                    <div class="stat-item"><h3>Days > 16 Pomos</h3><span class="value" id="days-over-16">--</span><span class="label">Max Focus</span></div>
+                    <div class="stat-item"><h3>Days > 20 Pomos</h3><span class="value" id="days-over-20">--</span><span class="label">Elite Focus</span></div>
+                </div>
+            </section>
+
+            <section class="dashboard-card momentum-card">
+                <h2 class="card-title"><i class="fas fa-rocket"></i>Productivity Momentum</h2>
+                <div class="momentum-indicator card-content">
+                    <div id="momentum-arrow-icon" class="momentum-arrow">--</div>
+                    <div id="momentum-text" class="momentum-text">Calculating...</div>
+                    <div id="momentum-details" class="momentum-details">(vs. previous 7 active days)</div>
+                </div>
+            </section>
+
+            <section class="dashboard-card on-this-day-card">
+                <h2 class="card-title"><i class="fas fa-calendar-day"></i>On This Day</h2>
+                <div class="on-this-day-content card-content" id="on-this-day-list">
+                    <p class="no-history-text">Loading data...</p>
+                </div>
+            </section>
+
+
+            <section class="dashboard-card heatmap-card">
+                <div class="heatmap-nav">
+                    <button id="heatmap-prev-year"><i class="fas fa-chevron-left"></i></button>
+                    <h2 class="card-title" style="margin-bottom:0;"><i class="fas fa-fire-alt"></i>Activity Heatmap (<span id="heatmap-year-display">This Year</span>)</h2>
+                    <button id="heatmap-next-year"><i class="fas fa-chevron-right"></i></button>
+                </div>
+                <div class="heatmap-container card-content">
+                    <div class="heatmap-weekdays-labels" id="heatmap-weekdays"></div>
+                    <div> <div class="heatmap-months-labels" id="heatmap-months"></div>
+                        <div class="heatmap-grid" id="heatmap-grid-content"></div>
+                    </div>
+                </div>
+                <div class="heatmap-legend">
+                    Less
+                    <div class="legend-item"><span class="legend-color-box" style="background-color: #f5f5f5;"></span></div>
+                    <div class="legend-item"><span class="legend-color-box" style="background-color: #fff3e0;"></span></div>
+                    <div class="legend-item"><span class="legend-color-box" style="background-color: #ffe0b2;"></span></div>
+                    <div class="legend-item"><span class="legend-color-box" style="background-color: #ffcc80;"></span></div>
+                    <div class="legend-item"><span class="legend-color-box" style="background-color: #ffb74d;"></span></div>
+                    <div class="legend-item"><span class="legend-color-box" style="background-color: #ffa726;"></span></div>
+                    More
+                </div>
+            </section>
+
+            <section class="dashboard-card hourly-chart-card">
+                <h2 class="card-title"><i class="fas fa-clock"></i>Peak Hours (Avg Pomodoros)</h2>
+                <div class="chart-container card-content">
+                    <canvas id="hourly-performance-chart"></canvas>
+                </div>
+            </section>
+
+            <section class="dashboard-card trends-chart-card">
+                <h2 class="card-title"><i class="fas fa-chart-line"></i>Productivity Trends</h2>
+                 <div class="chart-container card-content">
+                    <canvas id="trends-chart"></canvas>
+                </div>
+            </section>
+
+            <section class="dashboard-card achievements-card">
+                <h2 class="card-title"><i class="fas fa-trophy"></i>Achievements</h2>
+                <div class="achievements-container card-content" id="achievements-grid-content">
+                    <!-- Achievements will be dynamically inserted here by JS -->
+                </div>
+            </section>
+
+            <section class="dashboard-card log-history-card">
+                <div style="display:flex; justify-content: space-between; align-items: center;">
+                    <h2 class="card-title" style="margin-bottom: 0;"><i class="fas fa-history"></i>Daily Log Breakdown</h2>
+                    <div class="log-history-controls">
+                        <label for="sort-order">Sort Months:</label>
+                        <select id="sort-order">
+                            <option value="desc" selected>Newest First</option>
+                            <option value="asc">Oldest First</option>
+                        </select>
+                    </div>
+                </div>
+                <div id="log-details-content" class="card-content"></div>
+            </section>
+        </main>
+        
+        <div id="daily-flow-modal" class="modal">
+            <div class="modal-content">
+                <span class="modal-close" id="daily-flow-modal-close">&times;</span>
+                <h3 id="daily-flow-modal-title" class="modal-title">Hourly Focus Flow for DATE</h3>
+                <div class="mini-chart-container">
+                    <canvas id="daily-flow-chart"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <div id="loading-state" class="hidden">Loading your amazing productivity data... <i class="fas fa-spinner fa-spin"></i></div>
+        <div id="error-state" class="hidden"></div>
+        <div id="no-logs-state" class="hidden">No Pomodoro logs found yet. Time to start focusing!</div>
+    </div>
+
+    <script src="../static/js/dashboard.js" defer></script>
+</body>
+</html>

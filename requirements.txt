@@ -1,0 +1,12 @@
+# requirements.txt
+
+# Core dependencies for creating the webview window and desktop app
+# pywebview - REMOVED
+# pystray - REMOVED
+# plyer - REMOVED
+# Pillow - REMOVED
+
+# Dependencies for the backend API server
+Flask
+Flask-Cors
+gunicorn

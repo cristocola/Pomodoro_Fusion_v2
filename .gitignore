@@ -1,0 +1,24 @@
+# .gitignore
+
+# Python virtual environment
+# Never commit your venv folder
+venv/
+*.venv
+
+# Python cache files
+__pycache__/
+*.pyc
+
+# User-generated data folder
+# This single line ignores the entire data directory and everything inside it.
+/data/
+
+# IDE and OS-specific files
+.vscode/
+.idea/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+.DS_Store
