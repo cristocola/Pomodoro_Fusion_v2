@@ -189,9 +189,6 @@
             lastActivityEndTime = Date.now(); 
           }
           
-          updateNotificationButton();
-          WorkdayManager.updateWorkdayUI(); 
-
           // If workday is active and we are idle, start accumulating debt.
           if (isWorkdayActive && currentState === IDLE_STATE) {
             WorkdayManager.startDebtAccumulation();
