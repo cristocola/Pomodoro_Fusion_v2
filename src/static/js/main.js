@@ -3,7 +3,7 @@
       'use strict'; // Enable strict mode
 
       // --- Constants ---
-      const API_BASE_URL = "http://127.0.0.1:5000";
+      const API_BASE_URL = "";
       const LOG_ENDPOINT = `${API_BASE_URL}/log`;
       const DELETE_LOG_ENDPOINT = `${API_BASE_URL}/delete-last-log`;
       const LOGS_ENDPOINT = `${API_BASE_URL}/logs`;

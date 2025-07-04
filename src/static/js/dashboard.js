@@ -1,4 +1,4 @@
-const API_ENDPOINT = "http://127.0.0.1:5000/logs";
+const API_ENDPOINT = "/logs";
 
 // DOM Elements
 const refreshButton = document.getElementById('refresh-button');
