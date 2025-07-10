@@ -1,0 +1,64 @@
+# Project Context for Pomodoro Fusion
+
+## Current Goal
+We have created a native Android application to serve as a dedicated host for the Pomodoro Fusion web app. The next step is to build and test it.
+
+## Problem Being Solved
+- The web app's timers and alarms do not function correctly in all mobile browsers due to security restrictions on insecure `http://` connections.
+- An Android app provides a more reliable environment for features like background alarms.
+
+## Android App Implementation
+- **Technology**: Native Android (Java/XML) using Android Studio and Gradle.
+- **Architecture**:
+    - A `WebView` component loads the live web application from `http://16.171.52.110`.
+    - A native Android `AlarmManager` service is used to trigger alarms reliably, even when the app is in the background.
+    - A JavaScript Interface (`WebAppInterface.java`) connects the web app's JavaScript to the native Android code, allowing the web app to schedule native alarms.
+- **Status**: All source code for the Android application has been generated and is located in the `PomodoroFusionAndroid` directory. The web app's JavaScript (`main.js`) has also been updated to support this.
+
+## Existing Web App Context
+- The primary web application, `Pomodoro_Fusion`, is deployed and hosted on an EC2 Amazon Linux server at `http://16.171.52.110`.
+
+## Next Steps When We Resume
+1.  Open the `PomodoroFusionAndroid` project folder in Android Studio.
+2.  Build the project to compile it into an `.apk` file.
+3.  Install the generated `.apk` on an Android device for testing.
+4.  Verify that the web app loads correctly and that alarms function as expected (vibration and sound) when the app is in the foreground and background.
+
+---
+## Android Build Troubleshooting and Final Configuration (July 2025)
+
+After significant troubleshooting, a persistent Gradle build failure was resolved. The root cause was a misconfigured local development environment, not an error in the project's build files.
+
+### Summary of the Problem:
+1.  **Missing SDK Platform:** The project required Android API 34, but it was not installed in the Android Studio SDK Manager.
+2.  **Missing Gradle Wrapper:** The project was missing the entire Gradle Wrapper (`gradlew.bat`, `gradle/wrapper/...`). This prevented Android Studio from downloading and using the correct Gradle version, leading to generic build errors.
+
+### Correct Setup and Recovery Steps:
+These steps must be followed if the project needs to be set up on a new machine or if the build fails again.
+
+1.  **Verify SDK Platform:**
+    *   In Android Studio, go to **File > Settings > Appearance & Behavior > System Settings > Android SDK**.
+    *   On the **"SDK Platforms"** tab, ensure **Android 14.0 (API 34)** is installed.
+
+2.  **Verify SDK Tools:**
+    *   On the **"SDK Tools"** tab, ensure **Android SDK Command-line Tools** is installed.
+
+3.  **Manually Create `gradle-wrapper.properties`:**
+    *   If the Gradle Wrapper is missing, the key is to manually create the file `PomodoroFusionAndroid/gradle/wrapper/gradle-wrapper.properties`.
+    *   The content of this file should be:
+        ```properties
+        distributionBase=GRADLE_USER_HOME
+        distributionPath=wrapper/dists
+        distributionUrl=https\://services.gradle.org/distributions/gradle-8.2-bin.zip
+        zipStoreBase=GRADLE_USER_HOME
+        zipStorePath=wrapper/dists
+        ```
+
+4.  **Configure Gradle Settings in Android Studio:**
+    *   Go to **File > Settings > Build, Execution, Deployment > Build Tools > Gradle**.
+    *   Ensure **"Use Gradle from:"** is set to **`'wrapper' selected`**.
+    *   Ensure **"Gradle JDK"** is set to the embedded JDK (e.g., **`jbr-17`** or **`jbr-21`**).
+
+5.  **Sync Project:**
+    *   Click the **"Sync Project with Gradle Files"** button. This will use the new `gradle-wrapper.properties` to download the correct Gradle version and build the rest of the wrapper files, resolving the issue.
+---

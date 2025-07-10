@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<full-backup-content>
+    <!--
+   In this file you can specify which parts of your application's data you want to back up.
+   For more information please see https://developer.android.com/guide/topics/data/autobackup
+    -->
+    <include
+        domain="sharedpref"
+        path="." />
+    <exclude
+        domain="sharedpref"
+        path="device.xml" />
+</full-backup-content>

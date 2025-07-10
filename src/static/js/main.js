@@ -169,7 +169,9 @@
           alarmVolumeInput.value = get('volume') || defaults.volume;
           volumeValueDisplay.textContent = alarmVolumeInput.value; 
           showTodayOnlyCheckbox.checked = (get('showToday') === null) ? defaults.showToday : (get('showToday') === 'true');
-          notificationPermission = Notification.permission; 
+          if (typeof Notification !== 'undefined') {
+            notificationPermission = Notification.permission;
+          }
           
           isWorkdayActive = getJson('isWorkdayActive') !== null ? getJson('isWorkdayActive') : defaults.isWorkdayActive;
           workdayStartTime = getJson('workdayStartTime') ? parseInt(getJson('workdayStartTime')) : defaults.workdayStartTime;
@@ -226,6 +228,11 @@
       // --- Notification Manager ---
       const Notify = (() => {
         const requestPermission = async () => {
+          // Do not run this logic if inside the native Android app
+          if (typeof Android !== "undefined" && Android.scheduleAlarm) {
+            console.log("Native Android environment detected, skipping web notification permission.");
+            return;
+          }
           if (!('Notification' in window)) {
             alert('This browser does not support desktop notification');
             return;
@@ -793,16 +800,18 @@
           const durationMs = durationSetting * 1000;
           const effectiveDurationMs = isEarlyFinish && completedState === WORK_STATE ? Math.min(durationMs, 3000) : durationMs;
 
-          alarmSound.currentTime = 0;
-          alarmSound.volume = Math.max(0, Math.min(1, (parseInt(alarmVolumeInput.value || Settings.defaults.volume, 10)) / 10)); 
-          alarmSound.play().catch(e => console.error("Error playing sound:", e));
-          setTimeout(() => { if (!alarmSound.paused) { alarmSound.pause(); alarmSound.currentTime = 0; }}, effectiveDurationMs);
-
-          let notifyTitle = "Time's Up!", notifyBody = "Session finished.";
-          if (completedState === BREAK_STATE || completedState === LONGBREAK_STATE) { notifyTitle = "Break Over!"; notifyBody = "Time to get back to work!"; }
-          else if (isEarlyFinish && completedState === WORK_STATE) { notifyTitle = "Session Finished Early!"; notifyBody = "Pomodoro logged. Time for a break!"; }
-          else if (completedState === WORK_STATE) { notifyTitle = "Work Session Complete!"; notifyBody = "Great focus! Time for a well-deserved break."; }
-          Notify.show(notifyTitle, notifyBody);
+          // --- Android Native Alarm ---
+          if (typeof Android !== "undefined" && Android.scheduleAlarm) {
+            const triggerAtMillis = Date.now() + 100; // Trigger almost immediately
+            Android.scheduleAlarm(triggerAtMillis);
+            console.log(`Scheduled native Android alarm to trigger at ${new Date(triggerAtMillis).toLocaleTimeString()}`);
+          } else {
+            // --- Fallback for Web Browsers ---
+            alarmSound.currentTime = 0;
+            alarmSound.volume = Math.max(0, Math.min(1, (parseInt(alarmVolumeInput.value || Settings.defaults.volume, 10)) / 10));
+            alarmSound.play().catch(e => console.error("Error playing sound:", e));
+            setTimeout(() => { if (!alarmSound.paused) { alarmSound.pause(); alarmSound.currentTime = 0; }}, effectiveDurationMs);
+          }
         }
 
         function cycleQuotes() {
