@@ -79,7 +79,7 @@
       let duration = 0;
       let pausedRemaining = null;
       let sessionCount = 0; 
-      let notificationPermission = Notification.permission;
+      let notificationPermission = (typeof Notification !== 'undefined') ? Notification.permission : 'default';
 
       // Workday State Variables
       let isWorkdayActive = false;
