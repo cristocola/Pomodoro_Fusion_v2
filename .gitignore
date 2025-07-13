@@ -12,7 +12,9 @@ __pycache__/
 # User-generated data folder
 # This single line ignores the entire data directory and everything inside it.
 /data/
-/PomodoroFusionAndroid/
+
+# Android project folder
+/PomoFusion_Android/
 
 # IDE and OS-specific files
 .vscode/
@@ -23,3 +25,6 @@ __pycache__/
 *.sln
 *.sw?
 .DS_Store
+
+# Workplace context file
+workplace_context.txt
