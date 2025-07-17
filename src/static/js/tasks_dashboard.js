@@ -83,11 +83,12 @@ document.addEventListener('DOMContentLoaded', function() {
         dayNumber.textContent = date.getDate();
         dayCell.appendChild(dayNumber);
 
-        const tasksForDay = allTasks.filter(task => task.created_at.startsWith(dateKey));
+        const tasksForDay = allTasks.filter(task => task.created_at && task.created_at.startsWith(dateKey));
 
         tasksForDay.forEach(task => {
             const taskElement = document.createElement('div');
-            taskElement.classList.add('task-item', `status-${task.status}`);
+            const statusClass = `status-${task.status.replace(/\s+/g, '-')}`;
+            taskElement.classList.add('task-item', statusClass);
             taskElement.innerHTML = `
                 <div class="task-desc">${task.task_description}</div>
                 <div class="task-stats">

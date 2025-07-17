@@ -127,7 +127,7 @@ header .subtitle { font-size: 0.85rem; color: var(--text-secondary); margin-top:
     border-left: 4px solid var(--accent-secondary);
 }
 .task-item.status-Completed { border-left-color: #28a745; }
-.task-item.status-InProgress { border-left-color: #ffc107; }
+.task-item.status-In-Progress { border-left-color: #ffc107; }
 
 .task-desc { font-weight: 500; margin-bottom: 3px; }
 .task-stats { font-size: 0.75rem; color: var(--text-secondary); }
