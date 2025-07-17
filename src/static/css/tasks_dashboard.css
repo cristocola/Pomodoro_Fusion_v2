@@ -31,10 +31,12 @@ header {
     padding: var(--spacing-unit) 0;
     margin-bottom: calc(var(--spacing-unit) * 2);
     border-bottom: 1px solid var(--border-color);
+    flex-wrap: wrap; /* Allow wrapping on small screens */
+    gap: 1rem;
 }
 .header-title { display: flex; align-items: center; }
 #logo { width: 45px; height: 45px; margin-right: calc(var(--spacing-unit) * 0.75); }
-header h1 { font-size: clamp(1.7rem, 4vw, 2.1rem); font-weight: 600; }
+header h1 { font-size: clamp(1.5rem, 4vw, 2.1rem); font-weight: 600; }
 header .subtitle { font-size: 0.85rem; color: var(--text-secondary); margin-top: -4px; }
 .header-controls .button-link {
     background-color: var(--accent-primary);
@@ -65,7 +67,7 @@ header .subtitle { font-size: 0.85rem; color: var(--text-secondary); margin-top:
     align-items: center;
     margin-bottom: 1.5rem;
 }
-.board-nav h2 { font-size: 1.5rem; font-weight: 600; }
+.board-nav h2 { font-size: clamp(1.2rem, 3vw, 1.5rem); font-weight: 600; }
 .board-nav button {
     background: none;
     border: none;
@@ -142,3 +144,59 @@ header .subtitle { font-size: 0.85rem; color: var(--text-secondary); margin-top:
 #loading-state.visible, #error-state.visible, #no-tasks-state.visible { display: block; }
 #error-state { color: #dc3545; }
 .hidden { display: none !important; }
+
+/* --- Responsive Design --- */
+
+/* Tablet and Desktop */
+@media (min-width: 769px) {
+    /* The default styles are for desktop, so no major changes needed here */
+    /* We can add minor tweaks if necessary */
+}
+
+/* Mobile Devices */
+@media (max-width: 768px) {
+    body {
+        padding: calc(var(--spacing-unit) * 0.5);
+    }
+    .container {
+        padding: calc(var(--spacing-unit) * 0.5);
+    }
+    #task-board {
+        padding: calc(var(--spacing-unit) * 0.8);
+    }
+    .calendar-grid-header {
+        display: none; /* Hide Sun-Sat header on mobile */
+    }
+    .calendar-grid {
+        display: flex;
+        flex-direction: column;
+        min-height: auto;
+        gap: 10px; /* Add more space between days in list view */
+    }
+    .calendar-day {
+        min-height: 80px;
+        overflow-y: visible; /* Allow days to grow */
+    }
+    .calendar-day.other-month {
+        display: none; /* Hide days from other months */
+    }
+    .calendar-day .day-number {
+        display: block;
+        text-align: left;
+        width: 100%;
+        padding-bottom: 5px;
+        margin-bottom: 8px;
+        border-bottom: 1px solid var(--border-color);
+    }
+    .calendar-day.today .day-number {
+        /* Override the circle style for list view */
+        background-color: transparent;
+        color: var(--accent-primary);
+        font-weight: 700;
+        border-radius: 0;
+        width: auto;
+        height: auto;
+        float: none;
+        display: block;
+    }
+}

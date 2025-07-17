@@ -80,7 +80,13 @@ document.addEventListener('DOMContentLoaded', function() {
 
         const dayNumber = document.createElement('div');
         dayNumber.classList.add('day-number');
-        dayNumber.textContent = date.getDate();
+        
+        // Check screen width to decide date format
+        if (window.innerWidth <= 768) {
+            dayNumber.textContent = date.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' });
+        } else {
+            dayNumber.textContent = date.getDate();
+        }
         dayCell.appendChild(dayNumber);
 
         const tasksForDay = allTasks.filter(task => task.created_at && task.created_at.startsWith(dateKey));
