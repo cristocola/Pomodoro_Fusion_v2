@@ -32,7 +32,6 @@
   const skipBreakBtn = document.getElementById("skipBreakBtn");
   const resetBtn = document.getElementById("resetBtn");
   const finishEarlyBtn = document.getElementById("finishEarlyBtn");
-  const voidPomoBtn = document.getElementById("voidPomoBtn");
   const deleteLogBtn = document.getElementById("deleteLogBtn");
   const showTodayOnlyCheckbox = document.getElementById("showTodayOnly");
   const logList = document.getElementById("log");
@@ -231,7 +230,6 @@
       startBreakBtn.classList.add('hidden');
       skipBreakBtn.classList.add('hidden');
       finishEarlyBtn.classList.add('hidden');
-      voidPomoBtn.classList.add('hidden');
 
       const baseStateForClass = currentState === PAUSED_STATE ? pausedFromState : currentState;
       if (baseStateForClass === WORK_STATE) body.classList.add('state-work');
@@ -247,7 +245,6 @@
           startWorkBtn.classList.add('state-running');
           if (currentState === WORK_STATE) {
             finishEarlyBtn.classList.remove('hidden');
-            voidPomoBtn.classList.remove('hidden');
           }
           else skipBreakBtn.classList.remove('hidden');
           break;
@@ -259,7 +256,6 @@
           startWorkBtn.textContent = "Resume";
           if (pausedFromState === WORK_STATE) {
             finishEarlyBtn.classList.remove('hidden');
-            voidPomoBtn.classList.remove('hidden');
           }
           if (pausedFromState === BREAK_STATE || pausedFromState === LONGBREAK_STATE) skipBreakBtn.classList.remove('hidden');
           break;
@@ -445,18 +441,7 @@
       }
     }
 
-    function voidPomodoro() {
-        if (currentState === WORK_STATE || (currentState === PAUSED_STATE && pausedFromState === WORK_STATE)) {
-            if (timerInterval) { clearInterval(timerInterval); timerInterval = null; }
-            currentState = IDLE_STATE;
-            pausedRemaining = null;
-            pausedFromState = null;
-            timerStatusDisplay.textContent = "Pomodoro voided. Ready to start again.";
-            updateUIState();
-        }
-    }
-
-    return { workToggle, startBreakHandler, skipBreakHandler, reset, finishEarly, voidPomodoro, updateUIState };
+    return { workToggle, startBreakHandler, skipBreakHandler, reset, finishEarly, updateUIState };
   })();
 
 
@@ -712,19 +697,8 @@
             taskList.appendChild(li);
         });
     }
-    
-    addTaskForm.addEventListener('submit', (e) => {
-        e.preventDefault();
-        const description = taskDescriptionInput.value.trim();
-        const estimate = parseInt(taskEstimateInput.value, 10);
-        if (description && estimate > 0) {
-            addTask(description, estimate);
-            taskDescriptionInput.value = '';
-            taskEstimateInput.value = 1;
-        }
-    });
 
-    return { init: fetchTasks, incrementPomodoro };
+    return { init: fetchTasks, incrementPomodoro, addTask };
   })();
 
 
@@ -783,10 +757,20 @@
       skipBreakBtn.addEventListener("click", Timer.skipBreakHandler);
       resetBtn.addEventListener("click", Timer.reset);
       finishEarlyBtn.addEventListener("click", Timer.finishEarly);
-      voidPomoBtn.addEventListener("click", Timer.voidPomodoro);
       deleteLogBtn.addEventListener("click", LogManager.deleteLastLog);
       showTodayOnlyCheckbox.addEventListener("change", LogManager.renderLogs);
       enableNotificationsBtn.addEventListener("click", Notify.requestPermission);
+
+      addTaskForm.addEventListener('submit', (e) => {
+        e.preventDefault();
+        const description = taskDescriptionInput.value.trim();
+        const estimate = parseInt(taskEstimateInput.value, 10);
+        if (description && estimate > 0) {
+            TaskManager.addTask(description, estimate);
+            taskDescriptionInput.value = '';
+            taskEstimateInput.value = 1;
+        }
+      });
 
       alarmVolumeInput.addEventListener('input', () => {
         volumeValueDisplay.textContent = alarmVolumeInput.value;
