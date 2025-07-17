@@ -27,4 +27,4 @@ __pycache__/
 .DS_Store
 
 # Workplace context file
-workplace_context.txt
+# workplace_context.txt

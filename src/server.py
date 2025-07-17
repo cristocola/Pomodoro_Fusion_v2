@@ -1,11 +1,17 @@
 # pomodoro web server (client to the API)
-from flask import Flask, request, jsonify, render_template
+from flask import Flask, request, jsonify, render_template, session, redirect, url_for, flash
 import requests
 import os
 from flask_cors import CORS
 
 app = Flask(__name__, static_folder='static', template_folder='templates')
 CORS(app) # Enable CORS for all routes
+
+# --- Configuration ---
+# Secret key for session management
+app.secret_key = os.environ.get('FLASK_SECRET_KEY', 'a-very-secret-key-that-should-be-changed')
+# Password for login
+LOGIN_PASSWORD = os.environ.get('POMODORO_PASSWORD', 'pomodoro')
 
 # --- API Client Configuration ---
 # The API server runs on a different port, but on the same machine.
@@ -19,10 +25,34 @@ HEADERS = {"X-API-Key": SECRET_API_KEY}
 # --- Webpage Routes ---
 @app.route('/')
 def index():
+    if not session.get('logged_in'):
+        return redirect(url_for('login'))
     return render_template('index.html')
+
+@app.route('/login', methods=['GET', 'POST'])
+def login():
+    if request.method == 'POST':
+        password = request.form.get('password')
+        if password == LOGIN_PASSWORD:
+            session['logged_in'] = True
+            flash('Login successful!', 'success')
+            return redirect(url_for('index'))
+        else:
+            flash('Invalid password. Please try again.', 'danger')
+            return redirect(url_for('login'))
+    return render_template('login.html')
+
+@app.route('/logout')
+def logout():
+    session.pop('logged_in', None)
+    flash('You have been logged out.', 'info')
+    return redirect(url_for('login'))
 
 @app.route('/dashboard')
 def dashboard():
+    # Optionally, you could also protect the dashboard
+    # if not session.get('logged_in'):
+    #     return redirect(url_for('login'))
     return render_template('dashboard.html')
 
 # --- API Proxy Routes ---
@@ -31,6 +61,8 @@ def dashboard():
 
 @app.route("/log", methods=["POST"])
 def save_log():
+    if not session.get('logged_in'):
+        return jsonify({"error": "Unauthorized"}), 401
     if not request.is_json:
         return jsonify({"error": "Request must be JSON"}), 400
     
@@ -45,6 +77,8 @@ def save_log():
 
 @app.route("/logs", methods=["GET"])
 def get_logs():
+    # The dashboard is public, so this endpoint can remain accessible
+    # If dashboard were protected, this would need session check too.
     try:
         # Forward the request to the API server
         api_response = requests.get(f"{API_BASE_URL}/logs", headers=HEADERS)
@@ -56,6 +90,8 @@ def get_logs():
 
 @app.route("/delete-last-log", methods=["POST"])
 def delete_last_log():
+    if not session.get('logged_in'):
+        return jsonify({"error": "Unauthorized"}), 401
     try:
         # Forward the request to the API server
         api_response = requests.post(f"{API_BASE_URL}/delete-last-log", headers=HEADERS)

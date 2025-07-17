@@ -1,0 +1,83 @@
+# Pomodoro Fusion Project Context
+
+This document outlines the current state of the Pomodoro Fusion project.
+
+## Recent Changes (July 16, 2025)
+- **Debloated Web Client:** Removed the "Start Workday," "End Workday," and "Time Debt" features from the main landing page (`index.html`). This involved:
+    - Removing the workday control panel from the HTML.
+    - Deleting the corresponding CSS rules for the workday elements.
+    - Stripping out the `WorkdayManager` module, all related state variables, and logic from `main.js`. The application is now simpler and focused purely on the Pomodoro timer and session logging.
+
+## Core Application
+
+The application is a Pomodoro timer with a web interface and a backend for logging session data. It is hosted on an EC2 instance.
+
+### Architecture (Updated)
+
+The backend has been refactored from a single service into a two-service architecture:
+
+1.  **Web Server (`src/server.py`):** A Flask application that serves the HTML/CSS/JS web interface. It no longer interacts with the database directly. Instead, it acts as a client, making authenticated local requests to the API server.
+2.  **API Server (`src/api_server.py`):** A dedicated Flask application that provides a RESTful API for all database operations (logging, fetching, deleting).
+    *   **Authentication:** It is secured with a secret API key. All requests must include the header `X-API-Key: testpassword1`.
+    *   **Database:** It uses an SQLite database located at `/data/pomodoro_logs.db`.
+
+### EC2 Deployment (Updated)
+
+The application runs on an Amazon Linux 2023 EC2 instance with the public IP `http://16.171.52.110/`. There are now two `systemd` services managing the application:
+
+**1. Web Server Service (`pomodoro.service`):**
+This service runs the web interface on port 80.
+```ini
+# /etc/systemd/system/pomodoro.service
+[Unit]
+Description=Gunicorn instance to serve Pomodoro Fusion
+After=network.target
+
+[Service]
+User=ec2-user
+Group=ec2-user
+WorkingDirectory=/home/ec2-user/Pomodoro_Fusion_v2
+ExecStart=/home/ec2-user/Pomodoro_Fusion_v2/venv/bin/gunicorn --chdir src -w 2 --bind 0.0.0.0:80 server:app
+Restart=always
+
+[Install]
+WantedBy=multi-user.target
+```
+
+**2. API Server Service (`pomodoro_api.service`):**
+This new service runs the data API on port 5001, which is open to public TCP traffic in the EC2 security group.
+```ini
+# /etc/systemd/system/pomodoro_api.service
+[Unit]
+Description=Gunicorn instance to serve Pomodoro Fusion API
+After=network.target
+
+[Service]
+User=ec2-user
+Group=ec2-user
+WorkingDirectory=/home/ec2-user/Pomodoro_Fusion_v2
+ExecStart=/home/ec2-user/Pomodoro_Fusion_v2/venv/bin/gunicorn --chdir src -w 2 --bind 0.0.0.0:5001 api_server:app
+Restart=always
+
+[Install]
+WantedBy=multi-user.target
+```
+
+---
+
+## Android App Development
+
+An Android client is  developed in the `PomoFusion_Android/` directory (this directory is in `.gitignore`). This works using the api_server, so careful consideration must be made when changing the api server (if needs change. I like it like it is plain and simple)
+
+
+
+
+## General Workflow
+
+When making changes, the process is:
+1.  Modify files locally in Windows.
+2.  Commit changes with a simple, descriptive message (e.g., `git commit -m "fix android viewmodel"`).
+3.  Push to the `main` branch (`git push origin main`).
+4.  Instruct the user to pull the changes and restart the relevant services on the EC2 instance.
+
+Do not add strange characters to the gitt commit and watch out with how you declare directories and stuff. You very annoingly often get stuck with "pathspec: error" do simple commit with simple message, just numbers and letters nothing else in the message.
