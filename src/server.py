@@ -20,7 +20,7 @@ API_BASE_URL = "http://127.0.0.1:5001"
 # This key must match the one in api_server.py
 # In a real scenario, this would be loaded from an environment variable
 SECRET_API_KEY = "testpassword1"
-HEADERS = {"X-API-Key": SECRET_API_KEY}
+HEADERS = {"X-API-Key": SECRET_API_KEY, "Content-Type": "application/json"}
 
 # --- Webpage Routes ---
 @app.route('/')
@@ -50,15 +50,16 @@ def logout():
 
 @app.route('/dashboard')
 def dashboard():
-    # Optionally, you could also protect the dashboard
-    # if not session.get('logged_in'):
-    #     return redirect(url_for('login'))
+    # This dashboard remains public as per original logic
     return render_template('dashboard.html')
 
-# --- API Proxy Routes ---
-# These routes act as a proxy to the real API server.
-# This keeps the API key secure on the server-side and not exposed to the browser.
+@app.route('/tasks-dashboard')
+def tasks_dashboard():
+    if not session.get('logged_in'):
+        return redirect(url_for('login'))
+    return render_template('tasks_dashboard.html')
 
+# --- API Proxy Routes: Session Logging ---
 @app.route("/log", methods=["POST"])
 def save_log():
     if not session.get('logged_in'):
@@ -67,20 +68,16 @@ def save_log():
         return jsonify({"error": "Request must be JSON"}), 400
     
     try:
-        # Forward the request to the API server
         api_response = requests.post(f"{API_BASE_URL}/log", json=request.get_json(), headers=HEADERS)
-        api_response.raise_for_status() # Raise an exception for bad status codes (4xx or 5xx)
+        api_response.raise_for_status()
         return api_response.json(), api_response.status_code
     except requests.exceptions.RequestException as e:
         print(f"[Web Server] ERROR forwarding to API: {e}")
-        return jsonify({"error": "Failed to connect to the logging service."}), 502 # Bad Gateway
+        return jsonify({"error": "Failed to connect to the logging service."}), 502
 
 @app.route("/logs", methods=["GET"])
 def get_logs():
-    # The dashboard is public, so this endpoint can remain accessible
-    # If dashboard were protected, this would need session check too.
     try:
-        # Forward the request to the API server
         api_response = requests.get(f"{API_BASE_URL}/logs", headers=HEADERS)
         api_response.raise_for_status()
         return api_response.json(), api_response.status_code
@@ -93,12 +90,63 @@ def delete_last_log():
     if not session.get('logged_in'):
         return jsonify({"error": "Unauthorized"}), 401
     try:
-        # Forward the request to the API server
         api_response = requests.post(f"{API_BASE_URL}/delete-last-log", headers=HEADERS)
         api_response.raise_for_status()
         return api_response.json(), api_response.status_code
     except requests.exceptions.RequestException as e:
         print(f"[Web Server] ERROR forwarding to API: {e}")
         return jsonify({"error": "Failed to connect to the logging service."}), 502
+
+# --- API Proxy Routes: Task Management ---
+@app.route("/api/tasks", methods=["POST", "GET"])
+def proxy_tasks():
+    if not session.get('logged_in'):
+        return jsonify({"error": "Unauthorized"}), 401
+    try:
+        if request.method == 'POST':
+            api_response = requests.post(f"{API_BASE_URL}/api/tasks", json=request.get_json(), headers=HEADERS)
+        else: # GET
+            api_response = requests.get(f"{API_BASE_URL}/api/tasks", headers=HEADERS)
+        api_response.raise_for_status()
+        return api_response.json(), api_response.status_code
+    except requests.exceptions.RequestException as e:
+        print(f"[Web Server] ERROR forwarding to task API: {e}")
+        return jsonify({"error": "Failed to connect to the task service."}), 502
+
+@app.route("/api/tasks/<int:task_id>/increment", methods=["POST"])
+def proxy_increment_task(task_id):
+    if not session.get('logged_in'):
+        return jsonify({"error": "Unauthorized"}), 401
+    try:
+        api_response = requests.post(f"{API_BASE_URL}/api/tasks/{task_id}/increment", headers=HEADERS)
+        api_response.raise_for_status()
+        return api_response.json(), api_response.status_code
+    except requests.exceptions.RequestException as e:
+        print(f"[Web Server] ERROR forwarding to task API: {e}")
+        return jsonify({"error": "Failed to connect to the task service."}), 502
+
+@app.route("/api/tasks/<int:task_id>/complete", methods=["POST"])
+def proxy_complete_task(task_id):
+    if not session.get('logged_in'):
+        return jsonify({"error": "Unauthorized"}), 401
+    try:
+        api_response = requests.post(f"{API_BASE_URL}/api/tasks/{task_id}/complete", headers=HEADERS)
+        api_response.raise_for_status()
+        return api_response.json(), api_response.status_code
+    except requests.exceptions.RequestException as e:
+        print(f"[Web Server] ERROR forwarding to task API: {e}")
+        return jsonify({"error": "Failed to connect to the task service."}), 502
+
+@app.route("/api/tasks/history", methods=["GET"])
+def proxy_task_history():
+    if not session.get('logged_in'):
+        return jsonify({"error": "Unauthorized"}), 401
+    try:
+        api_response = requests.get(f"{API_BASE_URL}/api/tasks/history", headers=HEADERS)
+        api_response.raise_for_status()
+        return api_response.json(), api_response.status_code
+    except requests.exceptions.RequestException as e:
+        print(f"[Web Server] ERROR forwarding to task API: {e}")
+        return jsonify({"error": "Failed to connect to the task service."}), 502
 
 # The server will be started by a WSGI server like Gunicorn

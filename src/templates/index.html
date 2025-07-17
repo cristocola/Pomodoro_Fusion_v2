@@ -34,24 +34,41 @@
 
       <div id="controls">
         <button id="startWorkBtn" aria-label="Start or Pause Work Timer">Start Work</button>
-        <button id="startBreakBtn" class="hidden" aria-label="Start Break Timer">Start Break</button> <button id="skipBreakBtn" class="hidden" aria-label="Skip current break">Skip Break</button>
+        <button id="startBreakBtn" class="hidden" aria-label="Start Break Timer">Start Break</button>
+        <button id="skipBreakBtn" class="hidden" aria-label="Skip current break">Skip Break</button>
         <button id="finishEarlyBtn" class="hidden" aria-label="Finish current session early and log">Finish Early</button>
+        <button id="voidPomoBtn" class="hidden" aria-label="Void current Pomodoro due to interruption">Void Pomo</button>
         <button id="resetBtn" aria-label="Reset Timer and current session cycle">Reset Cycle</button>
       </div>
 
+      <section id="task-manager-section" aria-labelledby="task-manager-heading">
+        <h2 id="task-manager-heading">Today's Tasks</h2>
+        <form id="add-task-form">
+            <input type="text" id="task-description-input" placeholder="Enter a new task..." required>
+            <input type="number" id="task-estimate-input" value="1" min="1" max="10" title="Estimated Pomodoros">
+            <button type="submit" title="Add Task"><i class="fas fa-plus"></i> Add</button>
+        </form>
+        <div id="task-list-container">
+            <ul id="task-list">
+                <!-- Tasks will be dynamically inserted here -->
+            </ul>
+        </div>
+      </section>
+
       <section id="todays-progress-display" aria-labelledby="progress-heading">
-        <h2 id="progress-heading">Today's Progress</h2>
+        <h2 id="progress-heading">Today's Session Progress</h2>
         <div id="pomo-count">Today's sessions: 0</div>
         <div id="pomodoro-visual" aria-label="Visual indicator of completed sessions today"></div>
       </section>
 
       <section id="log-display-section" aria-labelledby="log-heading">
-        <h2 id="log-heading">Completed Pomodoros Log</h2>
+        <h2 id="log-heading">Completed Session Log</h2>
         <div class="log-options">
           <label for="showTodayOnly">
-            <input type="checkbox" id="showTodayOnly" checked> Show Only Today's Logs
+            <input type="checkbox" id="showTodayOnly" checked> Show Only Today's Sessions
           </label>
-          <a id="viewHistoryLink" class="button-link" href="/dashboard" target="_blank" rel="noopener noreferrer">View Full History</a>
+          <a class="button-link" href="/dashboard" target="_blank" rel="noopener noreferrer">Stats Dashboard</a>
+          <a class="button-link" href="/tasks-dashboard" target="_blank" rel="noopener noreferrer">Task Dashboard</a>
         </div>
         <div class="log-container">
           <ul id="log" aria-live="polite">
@@ -65,9 +82,12 @@
         </div>
       </section>
 
-      <div id="reward-quote" class="hidden" aria-live="polite"></div> <div id="api-status" aria-live="assertive"></div>
+      <div id="reward-quote" class="hidden" aria-live="polite"></div>
+      <div id="api-status" aria-live="assertive"></div>
 
-    </div> </main> <div id="settings-modal-container" aria-modal="true" role="dialog" aria-labelledby="settings-heading-modal">
+    </div>
+  </main>
+  <div id="settings-modal-container" aria-modal="true" role="dialog" aria-labelledby="settings-heading-modal">
     <form id="settings-form">
       <button type="button" id="closeSettingsBtn" aria-label="Close Settings">×</button>
       <fieldset>
@@ -95,7 +115,9 @@
           </label>
           <div class="volume-control">
             <label for="alarmVolume">Volume:</label>
-            <input type="range" id="alarmVolume" name="volume" min="0" max="10" value="4"> <span id="volumeValue">4</span> </div>
+            <input type="range" id="alarmVolume" name="volume" min="0" max="10" value="4">
+            <span id="volumeValue">4</span>
+          </div>
         </div>
       </fieldset>
       <fieldset>
@@ -107,6 +129,7 @@
     </form>
   </div>
   <audio id="alarm-sound" src="../static/audio/alarm.mp3" preload="auto"></audio>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/js/all.min.js"></script>
   <script src="../static/js/main.js"></script>
   
 </body>
