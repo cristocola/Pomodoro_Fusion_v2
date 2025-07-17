@@ -11,7 +11,7 @@ CORS(app) # Enable CORS for all routes
 # Secret key for session management
 app.secret_key = os.environ.get('FLASK_SECRET_KEY', 'a-very-secret-key-that-should-be-changed')
 # Password for login
-LOGIN_PASSWORD = os.environ.get('POMODORO_PASSWORD', 'pomodoro')
+LOGIN_PASSWORD = os.environ.get('POMODORO_PASSWORD', 'mypomodoro')
 
 # --- API Client Configuration ---
 # The API server runs on a different port, but on the same machine.
