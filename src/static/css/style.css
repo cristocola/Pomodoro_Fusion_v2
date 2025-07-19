@@ -436,19 +436,17 @@
 }
 .task-pomodoros .pomo-box.filled {
   background-color: var(--accent-color);
-  border-color: var(--accent-dark);
+  border-color: var(--accent-color-dark);
 }
 
-.task-actions button {
-  background: none;
-  border: none;
-  cursor: pointer;
-  padding: 4px;
-  margin-left: 8px;
-  font-size: 1rem;
-  color: #6c757d;
-  transition: color 0.2s;
+.task-pomodoros .pomo-box.over-estimate {
+  background-color: #e74c3c; /* A distinct red color */
+  border-color: #c0392b;
 }
+
+.task-actions {
+  display: flex;
+  align-items: center;
 .task-actions button:hover {
   color: var(--dark-text);
 }

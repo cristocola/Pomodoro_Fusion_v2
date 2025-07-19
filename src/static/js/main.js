@@ -656,6 +656,7 @@
 
             const pomodoros = document.createElement('div');
             pomodoros.className = 'task-pomodoros';
+            // Draw the estimated boxes first, filling them if completed
             for (let i = 0; i < task.estimated_pomodoros; i++) {
                 const box = document.createElement('div');
                 box.className = 'pomo-box';
@@ -664,10 +665,13 @@
                 }
                 pomodoros.appendChild(box);
             }
+            // If actual is greater than estimated, add new "over-estimate" boxes
             if (task.actual_pomodoros > task.estimated_pomodoros) {
-                const extra = document.createElement('span');
-                extra.textContent = `+${task.actual_pomodoros - task.estimated_pomodoros}`;
-                pomodoros.appendChild(extra);
+                for (let i = 0; i < task.actual_pomodoros - task.estimated_pomodoros; i++) {
+                    const box = document.createElement('div');
+                    box.className = 'pomo-box over-estimate';
+                    pomodoros.appendChild(box);
+                }
             }
             li.appendChild(pomodoros);
             
