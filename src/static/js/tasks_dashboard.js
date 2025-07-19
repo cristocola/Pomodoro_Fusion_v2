@@ -2,6 +2,7 @@ document.addEventListener('DOMContentLoaded', function() {
     'use strict';
 
     const API_ENDPOINT = '/api/tasks/history';
+    const API_BASE_URL = "";
 
     // DOM Elements
     const monthYearDisplay = document.getElementById('month-year-display');
