@@ -19,6 +19,7 @@ The backend uses a **dual-database architecture** to separate simple session log
 
 1.  **Web Server (`src/server.py`):** A Flask application that serves the web interface and handles user authentication.
     *   **Authentication:** Manages a user login session. The main timer page and the new task dashboard are protected and require a user to be logged in.
+    *   **Proxy-Aware Middleware:** The server uses `werkzeug.middleware.proxy_fix` to correctly handle `X-Forwarded-Proto` headers from reverse proxies like Cloudflare. This is essential for ensuring secure session cookies work correctly over HTTPS.
     *   **API Proxy:** Acts as a secure proxy for all requests from the frontend to the API server. It forwards requests to both the original session logging endpoints and the new task management endpoints.
 
 2.  **API Server (`src/api_server.py`):** A dedicated Flask application providing a RESTful API for all database operations. It is secured with a secret API key (`X-API-Key: testpassword1`). The API server now manages two separate databases.
@@ -39,6 +40,22 @@ To maintain compatibility while adding new features, the application now uses tw
     *   Tasks are added and managed via the new "Today's Tasks" UI on the main timer page.
     *   When a work timer is completed for a selected task, the `actual_pomodoros` count for that task is incremented in this database.
     *   This database powers the new "Task Dashboard," which displays the calendar view of work history.
+
+### API Endpoints
+
+The `api_server.py` provides the following key endpoints. All are protected by the `X-API-Key` header.
+
+*   **Session Logs (`pomodoro_logs.db`)**
+    *   `POST /log`: Saves a new pomodoro timestamp.
+    *   `GET /logs`: Retrieves all pomodoro timestamps.
+    *   `POST /delete-last-log`: Deletes the most recent pomodoro log.
+*   **Task Logs (`task_logs.db`)**
+    *   `POST /api/tasks`: Creates a new task.
+    *   `GET /api/tasks`: Retrieves today's tasks and any unfinished tasks.
+    *   `POST /api/tasks/<id>/increment`: Increments the `actual_pomodoros` for a task.
+    *   `POST /api/tasks/<id>/complete`: Marks a task as 'Completed'.
+    *   `DELETE /api/tasks/<id>`: Deletes a task.
+    *   `GET /api/tasks/history`: Retrieves all tasks from history.
 
 ### EC2 Deployment
 

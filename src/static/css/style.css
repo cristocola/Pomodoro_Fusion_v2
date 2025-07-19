@@ -447,6 +447,7 @@
 .task-actions {
   display: flex;
   align-items: center;
+}
 .task-actions button:hover {
   color: var(--dark-text);
 }
