@@ -3,9 +3,16 @@ from flask import Flask, request, jsonify, render_template, session, redirect, u
 import requests
 import os
 from flask_cors import CORS
+from werkzeug.middleware.proxy_fix import ProxyFix
 
 app = Flask(__name__, static_folder='static', template_folder='templates')
 CORS(app) # Enable CORS for all routes
+
+# --- Middleware for Proxy Servers ---
+# This is crucial for running behind a reverse proxy like Cloudflare.
+# It tells Flask to trust the X-Forwarded-Proto header, so it knows the
+# original connection was HTTPS, which is necessary for secure session cookies.
+app.wsgi_app = ProxyFix(app.wsgi_app, x_for=1, x_proto=1, x_host=1, x_prefix=1)
 
 # --- Configuration ---
 # Secret key for session management
