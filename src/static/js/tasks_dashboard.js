@@ -145,13 +145,6 @@ document.addEventListener('DOMContentLoaded', function() {
         taskBoard.classList.add('hidden');
     }
 
-    // Event Listeners
-    prevMonthBtn.addEventListener('click', () => changeMonth(-1));
-    nextMonthBtn.addEventListener('click', () => changeMonth(1));
-
-    // Initial Load
-    fetchTaskHistory();
-
     async function handleDeleteTask(taskId, taskElement) {
         if (!confirm(`Are you sure you want to delete this task?\n\n\"${taskElement.querySelector('.task-desc').textContent}\"`)) {
             return;
@@ -187,4 +180,11 @@ document.addEventListener('DOMContentLoaded', function() {
             showError(`Failed to delete task: ${error.message}`);
         }
     }
+
+    // Event Listeners
+    prevMonthBtn.addEventListener('click', () => changeMonth(-1));
+    nextMonthBtn.addEventListener('click', () => changeMonth(1));
+
+    // Initial Load
+    fetchTaskHistory();
 });
