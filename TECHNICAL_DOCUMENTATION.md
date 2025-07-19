@@ -1,6 +1,6 @@
-# Pomodoro Fusion Project Context
+# Pomodoro Fusion - Technical Documentation
 
-This document outlines the current state of the Pomodoro Fusion project.
+This document outlines the technical details of the Pomodoro Fusion project, including its architecture, deployment, and operational procedures.
 
 ## Recent Changes (July 17, 2025)
 - **Implemented Full Task-Based Pomodoro System:** The application has been upgraded from a simple session logger to a complete task management system that aligns with the official Pomodoro Technique. This was a major update involving new databases, API endpoints, and user interfaces.
@@ -13,28 +13,26 @@ This document outlines the current state of the Pomodoro Fusion project.
 
 The application is a full-featured Pomodoro timer and productivity tool with a web interface and a backend for logging both raw sessions and detailed task progress. It is hosted on an EC2 instance.
 
-### Architecture (Updated)
+### Architecture
 
-The backend has been significantly enhanced and now uses a **dual-database architecture** to separate simple session logging from the more detailed task management system. This ensures that legacy systems (like the Android app) that rely on the original, simple log format continue to function without disruption.
+The backend uses a **dual-database architecture** to separate simple session logging from the more detailed task management system. This ensures that legacy systems (like the Android app) that rely on the original, simple log format continue to function without disruption.
 
 1.  **Web Server (`src/server.py`):** A Flask application that serves the web interface and handles user authentication.
     *   **Authentication:** Manages a user login session. The main timer page and the new task dashboard are protected and require a user to be logged in.
     *   **API Proxy:** Acts as a secure proxy for all requests from the frontend to the API server. It forwards requests to both the original session logging endpoints and the new task management endpoints.
 
-2.  **API Server (`src/api_server.py`):** A dedicated Flask application providing a RESTful API for all database operations. It is still secured with a secret API key (`X-API-Key: testpassword1`). The API server now manages two separate databases.
+2.  **API Server (`src/api_server.py`):** A dedicated Flask application providing a RESTful API for all database operations. It is secured with a secret API key (`X-API-Key: testpassword1`). The API server now manages two separate databases.
 
 ### Logging System: A Dual-Database Approach
 
 To maintain compatibility while adding new features, the application now uses two distinct SQLite databases stored in the `/data/` directory.
 
 **1. Session Logging (`pomodoro_logs.db`) - The Original System**
-This database is intentionally simple and remains unchanged to support existing clients (e.g., the Android app).
 *   **Purpose:** To record the exact timestamp of every completed Pomodoro session. It answers the question: "*When* did I work?"
 *   **Table (`logs`):** Contains just an `id` and a `timestamp`.
 *   **Interaction:** An entry is added to this database every time a work timer is successfully completed. This system is used by the original "Stats Dashboard" to generate high-level statistics like streaks and heatmaps.
 
 **2. Task Logging (`task_logs.db`) - The New System**
-This new database provides the foundation for the task-based features aligned with the Pomodoro Technique.
 *   **Purpose:** To track specific tasks, their estimated effort, their actual effort, and their status. It answers the questions: "*What* did I work on, and did I estimate it correctly?"
 *   **Table (`tasks`):** Contains columns for `id`, `task_description`, `estimated_pomodoros`, `actual_pomodoros`, `status` ('Pending', 'In Progress', 'Completed'), `created_at`, and `completed_at`.
 *   **Interaction:**
@@ -42,9 +40,9 @@ This new database provides the foundation for the task-based features aligned wi
     *   When a work timer is completed for a selected task, the `actual_pomodoros` count for that task is incremented in this database.
     *   This database powers the new "Task Dashboard," which displays the calendar view of work history.
 
-### EC2 Deployment (Unchanged)
+### EC2 Deployment
 
-The application runs on an Amazon Linux 2023 EC2 instance with the public IP `http://16.171.52.110/`. The two `systemd` services remain the same.
+The application runs on an Amazon Linux 2023 EC2 instance with the public IP `http://16.171.52.110/`. The two `systemd` services are configured as follows:
 
 **1. Web Server Service (`pomodoro.service`):**
 Runs the web interface on port 80.
@@ -84,7 +82,7 @@ Restart=always
 WantedBy=multi-user.target
 ```
 
-### Automated Database Backups (New)
+### Automated Database Backups
 
 To ensure data integrity and provide disaster recovery, a fully automated backup system has been implemented.
 
@@ -106,6 +104,4 @@ An Android client is developed in the `PomoFusion_Android/` directory. **Crucial
 
 The workflow remains the same:
 1.  Modify files locally in Windows.
-2.  Commit changes with a simple, descriptive message (e.g., `git commit -m "feat: add task management system"`).
-3.  Push to the `main` branch (`git push origin main`).
-4.  Instruct the user to pull the changes and restart the relevant services on the EC2 instance.
+2.  Tell the user when changes are done so he can commit and push

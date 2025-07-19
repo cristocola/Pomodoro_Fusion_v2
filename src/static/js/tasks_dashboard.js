@@ -100,8 +100,18 @@ document.addEventListener('DOMContentLoaded', function() {
                 <div class="task-stats">
                     Est: ${task.estimated_pomodoros} | Act: ${task.actual_pomodoros}
                 </div>
+                <div class="task-actions">
+                    <i class="fas fa-trash-alt delete-btn" title="Delete Task"></i>
+                </div>
             `;
             dayCell.appendChild(taskElement);
+
+            // Add event listener for the delete button
+            const deleteBtn = taskElement.querySelector('.delete-btn');
+            deleteBtn.addEventListener('click', (e) => {
+                e.stopPropagation(); // Prevent the day cell click event
+                handleDeleteTask(task.id, taskElement);
+            });
         });
 
         return dayCell;
@@ -140,4 +150,40 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Initial Load
     fetchTaskHistory();
+
+    async function handleDeleteTask(taskId, taskElement) {
+        if (!confirm(`Are you sure you want to delete this task?\n\n\"${taskElement.querySelector('.task-desc').textContent}\"`)) {
+            return;
+        }
+
+        try {
+            const response = await fetch(`${API_BASE_URL}/api/tasks/${taskId}`, {
+                method: 'DELETE'
+            });
+
+            if (!response.ok) {
+                throw new Error(`Server responded with status: ${response.status}`);
+            }
+
+            // Remove the task from the UI immediately
+            taskElement.style.transition = 'opacity 0.3s ease';
+            taskElement.style.opacity = '0';
+            setTimeout(() => {
+                taskElement.remove();
+                // Optional: check if the day cell is now empty and add a class
+                const dayCell = taskElement.parentElement;
+                if (dayCell && dayCell.querySelectorAll('.task-item').length === 0) {
+                    // You could add a class to the day cell if it becomes empty
+                }
+            }, 300);
+
+
+            // Remove the task from the local array to keep state consistent
+            allTasks = allTasks.filter(t => t.id !== taskId);
+
+        } catch (error) {
+            console.error('Error deleting task:', error);
+            showError(`Failed to delete task: ${error.message}`);
+        }
+    }
 });

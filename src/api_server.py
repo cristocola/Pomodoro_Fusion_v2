@@ -239,6 +239,23 @@ def get_task_history():
         print(f"[API Server] ERROR fetching task history: {e}")
         return jsonify({"error": f"Database error: {e}"}), 500
 
+@app.route("/api/tasks/<int:task_id>", methods=["DELETE"])
+@require_api_key
+def delete_task(task_id):
+    """Deletes a task from the database."""
+    try:
+        with sqlite3.connect(TASK_DB_FILE) as conn:
+            cursor = conn.cursor()
+            cursor.execute("DELETE FROM tasks WHERE id = ?", (task_id,))
+            conn.commit()
+            if cursor.rowcount == 0:
+                return jsonify({"error": "Task not found"}), 404
+        print(f"[API Server] Deleted task ID: {task_id}")
+        return jsonify({"message": "Task deleted successfully"}), 200
+    except sqlite3.Error as e:
+        print(f"[API Server] ERROR deleting task: {e}")
+        return jsonify({"error": f"Database error: {e}"}), 500
+
 # Health check endpoint
 @app.route("/health", methods=["GET"])
 def health_check():

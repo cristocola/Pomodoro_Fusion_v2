@@ -1,0 +1,168 @@
+# Pomodoro Fusion - Task Management System Documentation for Android
+
+## 1. Overview
+
+This document outlines the new task-based logging system implemented in the Pomodoro Fusion web application. The goal is to provide a clear guide for replicating this functionality in the native Android client.
+
+This system is designed to run in parallel with the original session logging system. It uses a separate database and a new set of API endpoints, ensuring that its implementation will **not** interfere with the existing functionality that the Android app currently relies on.
+
+The core purpose of this new system is to allow users to:
+- Create a list of specific tasks for the day.
+- Estimate the effort (in Pomodoros) required for each task.
+- Track their actual Pomodoros against their estimates.
+- View a complete history of their work in a calendar-based dashboard.
+
+---
+
+## 2. Core Concepts: Dual-Database Architecture
+
+The backend now maintains two separate databases to distinguish between different types of logs:
+
+1.  **`pomodoro_logs.db` (The Original System):**
+    *   **Purpose:** Simple timestamping. It answers the question, "**When** did I complete a Pomodoro?"
+    *   **Android App Impact:** **None.** The Android app can continue to use the `/log` and `/logs` endpoints as it always has. This database remains untouched by the new task system.
+
+2.  **`task_logs.db` (The New System):**
+    *   **Purpose:** Detailed task tracking. It answers the question, "**What** did I work on, and how accurate was my estimate?"
+    *   **Android App Impact:** This is the system the Android app will need to integrate with to replicate the new features. It is accessed via a new set of API endpoints prefixed with `/api/tasks`.
+
+---
+
+## 3. User Workflow in the Web App
+
+To build a parallel experience, it's important to understand how the user interacts with the system in the web app.
+
+1.  **Viewing Today's Tasks:** When the main timer page loads, the app immediately fetches all tasks that are either pending or were created today.
+2.  **Adding a New Task:** The user enters a task description (e.g., "Develop new feature") and an estimated number of Pomodoros (e.g., 4). Upon submission, the task is saved to the database and instantly appears in the "Today's Tasks" list.
+3.  **Selecting a Task:** Before starting a work timer, the user **must** tap on a task from the list to select it. The selected task is highlighted.
+4.  **Completing a Pomodoro:** When the work timer finishes, the app automatically does two things:
+    *   It logs the session timestamp to the original `pomodoro_logs.db` (the existing functionality).
+    *   It increments the `actual_pomodoros` count for the currently selected task in the `task_logs.db`.
+5.  **Completing a Task:** When a user decides a task is finished (regardless of the Pomodoro count), they can tap a "complete" button next to the task. This marks its status as 'Completed' in the database, and it can no longer be selected for work.
+6.  **Viewing History:** The user can navigate to a separate "Task Dashboard" which displays a full-screen calendar. This dashboard fetches the entire task history and displays the tasks completed on each day, showing the "Estimated vs. Actual" Pomodoro count.
+
+---
+
+## 4. API Endpoint Documentation
+
+All new task-related endpoints are prefixed with `/api`.
+
+**Authentication:**
+-   All endpoints listed below require the `X-API-Key: testpassword1` header.
+-   They also require the user to be logged in (i.e., a valid session cookie must be sent). The web server (`server.py`) handles this authentication before proxying the request to the API server.
+
+---
+
+### 4.1 Get Today's Tasks
+
+-   **Endpoint:** `GET /api/tasks`
+-   **Purpose:** Fetches the list of tasks to be displayed on the main screen. This includes all tasks that are not yet 'Completed' OR any tasks that were created on the current day.
+-   **Request Body:** None.
+-   **Success Response (200 OK):**
+    ```json
+    {
+      "tasks": [
+        {
+          "id": 1,
+          "task_description": "Write the project documentation",
+          "estimated_pomodoros": 4,
+          "actual_pomodoros": 1,
+          "status": "In Progress",
+          "created_at": "2025-07-17 10:00:00",
+          "completed_at": null
+        },
+        {
+          "id": 2,
+          "task_description": "Plan the next sprint",
+          "estimated_pomodoros": 2,
+          "actual_pomodoros": 0,
+          "status": "Pending",
+          "created_at": "2025-07-17 10:05:00",
+          "completed_at": null
+        }
+      ]
+    }
+    ```
+
+### 4.2 Create a New Task
+
+-   **Endpoint:** `POST /api/tasks`
+-   **Purpose:** Creates a new task.
+-   **Request Body:**
+    ```json
+    {
+      "description": "My new task description",
+      "estimated_pomodoros": 3
+    }
+    ```
+    -   `description` (string, required): The text of the task.
+    -   `estimated_pomodoros` (integer, required): A number from 1 to 10.
+-   **Success Response (201 Created):** Returns the newly created task object.
+    ```json
+    {
+        "message": "Task created successfully!",
+        "task": {
+            "id": 3,
+            "task_description": "My new task description",
+            "estimated_pomodoros": 3,
+            "actual_pomodoros": 0,
+            "status": "Pending",
+            "created_at": "2025-07-17 11:30:00",
+            "completed_at": null
+        }
+    }
+    ```
+-   **Error Response (400 Bad Request):** If the description is missing or the estimate is invalid.
+    ```json
+    { "error": "Invalid or missing 'description'" }
+    ```
+
+### 4.3 Increment a Task's Pomodoro Count
+
+-   **Endpoint:** `POST /api/tasks/<task_id>/increment`
+-   **Purpose:** Called automatically after a work timer completes to add 1 to the `actual_pomodoros` count of the selected task.
+-   **Request Body:** None.
+-   **Success Response (200 OK):**
+    ```json
+    { "message": "Task updated successfully!" }
+    ```
+-   **Error Response (404 Not Found):** If the `task_id` does not exist.
+
+### 4.4 Mark a Task as Complete
+
+-   **Endpoint:** `POST /api/tasks/<task_id>/complete`
+-   **Purpose:** Marks a task's status as 'Completed' and sets the completion timestamp.
+-   **Request Body:** None.
+-   **Success Response (200 OK):**
+    ```json
+    { "message": "Task marked as complete!" }
+    ```
+-   **Error Response (404 Not Found):** If the `task_id` does not exist.
+
+### 4.5 Get Full Task History (for Dashboard)
+
+-   **Endpoint:** `GET /api/tasks/history`
+-   **Purpose:** Fetches all tasks ever created to populate the calendar-based dashboard.
+-   **Request Body:** None.
+-   **Success Response (200 OK):** Returns a list of all task objects, similar to the `GET /api/tasks` endpoint but without any date filtering.
+    ```json
+    {
+      "tasks": [
+        /* ... array of all task objects ... */
+      ]
+    }
+    ```
+
+---
+
+## 5. Data Model Reference
+
+The `Task` object has the following structure:
+
+-   `id` (integer): Unique identifier for the task.
+-   `task_description` (string): The user-defined name of the task.
+-   `estimated_pomodoros` (integer): The user's estimate of how many Pomodoros the task would take.
+-   `actual_pomodoros` (integer): The number of Pomodoros actually completed for the task.
+-   `status` (string): The current state of the task. Can be "Pending", "In Progress", or "Completed".
+-   `created_at` (string): The timestamp when the task was created (e.g., "YYYY-MM-DD HH:MM:SS").
+-   `completed_at` (string/null): The timestamp when the task was marked as complete. It is `null` if the task is not yet completed.

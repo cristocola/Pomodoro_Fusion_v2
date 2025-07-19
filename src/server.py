@@ -149,4 +149,21 @@ def proxy_task_history():
         print(f"[Web Server] ERROR forwarding to task API: {e}")
         return jsonify({"error": "Failed to connect to the task service."}), 502
 
+@app.route("/api/tasks/<int:task_id>", methods=["DELETE"])
+def proxy_delete_task(task_id):
+    """Proxies the delete request for a specific task."""
+    if not session.get('logged_in'):
+        return jsonify({"error": "Unauthorized"}), 401
+    try:
+        api_response = requests.delete(f"{API_BASE_URL}/api/tasks/{task_id}", headers=HEADERS)
+        api_response.raise_for_status()
+        # Check if the response has content before trying to parse JSON
+        if api_response.content:
+            return api_response.json(), api_response.status_code
+        else:
+            return "", api_response.status_code
+    except requests.exceptions.RequestException as e:
+        print(f"[Web Server] ERROR forwarding delete request to task API: {e}")
+        return jsonify({"error": "Failed to connect to the task service."}), 502
+
 # The server will be started by a WSGI server like Gunicorn
